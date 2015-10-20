@@ -65,25 +65,28 @@
 
 # main function parse the text and provides a first raw dataframe
 gettupel <- function (inputFile,short = TRUE) {
-  tupel = list()
+
   dfcount = 0
+  # create dataframe for the results of parsing
   family <- ''
   genus <- ''
   subgenus <- ''
   species <- ''
   loctype <- ''
   loc <- ''
-  df = data.frame(family,genus,subgenus,species,loctype,loc,stringsAsFactors =
-                    FALSE)
+  df = data.frame(family,genus,subgenus,species,loctype,loc,stringsAsFactors = FALSE)
+
+  # list for the return of the location parsing
   loc = list()
 
-  loctype = list("A","E","N")
+  # casually they seem not to exist
   gen = 'NA'
   subgen = 'NA'
-
+  # open connection to the file and read it sequentially line by line
    con  <- file(inputFile, open = "r")
    while (length(oneLine <-
                 readLines(con, n = 1, warn = TRUE)) > 0) {
+     # if 'family' is found split it and subslpit it (same with the rest keywords)
     if (charmatch("family",oneLine ,nomatch = 0) > 0) {
       tmp <- unlist(strsplit(oneLine, "family"))
       if (short) {tmp<- strsplit(tmp, ",")
@@ -100,20 +103,23 @@ gettupel <- function (inputFile,short = TRUE) {
                   subgen <- trimws(tmp[[2]][1][1])}
       else       {subgen <- trimws(tmp[[2]])}
     } else {
+      # all lines without keywords has to contain species
       species <- oneLine[1]
+      # so we call a special parser for them
       loc <- parseLocations(species)
+      # then we reorganise the returned lists
       if (length(loc) > 0) {
         for (i in seq(1,length(loc))) {
           sloc <- unlist(strsplit(loc[[i]], " "))
           if (length(sloc) > 0) {
             for (j in seq(2,length(sloc))) {
+              # actually this is the depreceated "tagged" version
               #txt<- paste("<family>",fam,"</family> <genus>",gen,"</genus> <subgenus>",subgen,"</subgenus> <species>",species,"</species> <loctype>",sloc[1],"</loctype> <locations>",sloc[j], "</locations>")
               #tupel[[length(tupel)+1]] <- txt
+              # we do what nobody would do in R we append it row by row to the data frame
               df[dfcount,] <-
                 c(fam,gen,subgen,species,sloc[1],sloc[j])
               dfcount = dfcount + 1
-
-
             }
           }
         }
@@ -127,19 +133,25 @@ gettupel <- function (inputFile,short = TRUE) {
 
 # subparser for geographic location keys
 parseLocations <- function (intext,x) {
-  # get position in string
+  # initialize the vars
   x = list()
   aloc = ''
   eloc = ''
   nloc = ''
+  # get position of the differnt location tags in the string
   ePos <-  str_locate_all(pattern = ' E: ',intext)[[1]][2] - 4
   aPos <-  str_locate_all(pattern = ' A: ',intext)[[1]][2] - 4
   nPos <-  str_locate_all(pattern = ' N: ',intext)[[1]][2] - 4
+  # ugly workaround because of totally chotic organization of the location codes
+  # and tags we have to derive a fixed order that we will be able to point on
+  # the correct labels after extracting them. i did it using a dataframe.
+  # finally we have a ordered list and we will submit the tags with the return
   names <- c("a", "e", "n")
   values <- c(aPos,ePos,nPos)
   df <- data.frame(names,values)
   df <- df[order(values),]
   df <- df[complete.cases(df),]
+  # if there is a location tag
   if (nrow(df) > 0) {
     for (i in seq(1,nrow(df))) {
       z <- df$values[i + 1]
@@ -147,12 +159,9 @@ parseLocations <- function (intext,x) {
       if (i == nrow(df)) {
         z <- nchar(intext)
       }
-
       var <- trimws(substring(intext,df$values[i] + 2 ,z + 1))
       x[i] <- var #paste0(df$names[i],'loc')
       assign(paste0(df$names[i],'loc'), var)
-      #paste0(df$names[i],'loc') = x[i]
-      #assign(paste(paste0(df$names[i],'loc'),sep=""), x[i])
     }
   }
   c(x, c = aloc)
