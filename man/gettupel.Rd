@@ -29,9 +29,9 @@ parseSpeciesList is a first prototype to parse running beetle
 
   It looks like:
 
-  familiy; genus; subgenus; species; location
-  Carabidae; Carabus; Carabinae; irregularis; GE
-  Carabidae; Carabus; Carabinae; irregularis; CZ
+  familiy;   genus;   subgenus;  species;     loctype; country\cr
+  Carabidae; Carabus; Carabinae; irregularis; A:;      GE\cr
+  Carabidae; Carabus; Carabinae; irregularis; N:;      CZ\cr
   .
   .
   .
