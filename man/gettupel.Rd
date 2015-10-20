@@ -7,8 +7,8 @@
 gettupel(inputFile, short = TRUE)
 }
 \arguments{
-\item{short}{logical default = TRUE trys to get only the names. if FALSE it
-  put all informations in the data frame}
+\item{short}{logical parameter if TRUE (default) the function trys to get only the names and country codes. If FALSE the full text
+  will put in the data frame.}
 
 \item{inputTXT}{a Text of the specified format}
 }
@@ -20,12 +20,15 @@ parseSpeciesList is a first prototype to parse running beetle
   Actually the parser looks line by line for keywords and special tags.
   Unfortunately it has to be performed line by line due to the fact that
   keywords for sepcies are missing and there are not always matching rules
-  for the special tags. So in a first try we use the <keywords> "family",
-  "genus" and "subgenus". They are *always in the beginning of a line. After
-  genus or subgenus the species will follow without a keyword. The species
-  Line is enhanced by a more or less systematic list of country codes THAT
-  DESCRIBES THE species occurence. This is all seperated and put in non
-  normalized dataframe.
+  for the special tags. So in a first try we use the keywords as "family",
+  "genus" and "subgenus". They are occuring *always* in the beginning of a
+  line. After genus or subgenus the species will follow without a keyword.
+  The species Line is enhanced by a more or less systematic list of country
+  codes to mark the species occurence in the listed countries.
+
+  The resulting dataframe is a not normalied relation (table) contaiing for
+  each country hit a the redundant information of family (sub)genus and
+  species. normalized dataframe.
 }
 \examples{
 ### examples parseSpeciesList ###
