@@ -25,7 +25,7 @@ This is a very raw and simple approach not optimized for R
  inputFile <- system.file("extdata", "species.chunk",   package="parseSpeciesList")
  df <- gettupel(inputFile)
 
- ### use case mapping
+ ###  mapping useCase  ####
 
  # we need some more libs
    if (!require(downloader)) {install.packages("downloader")}
