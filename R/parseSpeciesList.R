@@ -55,7 +55,6 @@
 #'    mapView(sPDF2)
 #'
 #' @export
-#' @docType gettupel
 #' @name gettupel
 #' @rdname gettupel
 #'
@@ -64,7 +63,7 @@
 
 
 # main function parse the text and provides a first raw dataframe
-gettupel <- function (pathToTxt) {
+gettupel <- function (inputFile) {
   tupel = list()
   dfcount = 0
   family <- ''
@@ -81,7 +80,7 @@ gettupel <- function (pathToTxt) {
   gen = 'NA'
   subgen = 'NA'
 
-   con  <- file(pathToTxt = NULL, open = "r")
+   con  <- file(inputFile, open = "r")
    while (length(oneLine <-
                 readLines(con, n = 1, warn = TRUE)) > 0) {
     if (charmatch("family",oneLine ,nomatch = 0) > 0) {
