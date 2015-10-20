@@ -6,16 +6,22 @@
 #'   This is a very raw and simple approach not really written in R style.
 #'   Actually the parser looks line by line for keywords and special tags.
 #'   Unfortunately it has to be performed line by line due to the fact that
-#'   keywords for sepcies are missing and there are not always matching rules
-#'   for the special tags. So in a first try we use the keywords as "family",
-#'   "genus" and "subgenus". They are occuring *always* in the beginning of a
-#'   line. After genus or subgenus the species will follow without a keyword.
-#'   The species Line is enhanced by a more or less systematic list of country
-#'   codes to mark the species occurence in the listed countries.
+#'   keywords for sepcies are missing and the rules are not always matching.
+#'   So in a first try we use the "family", "genus" and "subgenus" as keywords. They are always placed in the beginning of a
+#'   line. After "genus" or "subgenus" there is a single line for a single species.
+#'   In the species textline we will find a more or less systematic list of country
+#'   codes that indicate all countries with known occurrence of this special species.
 #'
-#'   The resulting dataframe is a not normalied relation (table) contaiing for
-#'   each country hit a the redundant information of family (sub)genus and
-#'   species. normalized dataframe.
+#'   The resulting dataframe is a not normalized relation ( so it means a huge table with mostly redundant informations).
+#'
+#'   It looks like:
+#'
+#'   familiy; genus; subgenus; species; location
+#'   Carabidae; Carabus; Carabinae; irregularis; GE
+#'   Carabidae; Carabus; Carabinae; irregularis; CZ
+#'   .
+#'   .
+#'   .
 #'
 #' @param inputTXT a Text of the specified format
 #' @param short logical parameter if TRUE (default) the function trys to get only the names and country codes. If FALSE the full text
