@@ -21,7 +21,7 @@ parseSpeciesList is a first prototype to parse running beetle
   Unfortunately it has to be performed line by line due to the fact that
   keywords for sepcies are missing and the rules are not always matching.
   So in a first try we use the "family", "genus" and "subgenus" as keywords. They are always placed in the beginning of a
-  line. After "genus" or "subgenus" there is a single line for a single species.
+  line. After "genus" or "subgenus" there is a unique line for each single species.
   In the species textline we will find a more or less systematic list of country
   codes that indicate all countries with known occurrence of this special species.
 
