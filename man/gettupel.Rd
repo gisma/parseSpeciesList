@@ -3,7 +3,7 @@
 \docType{gettupel}
 \name{gettupel}
 \alias{gettupel}
-\title{parseSpeciesList is a prototype parsers for running beetle species lists}
+\title{parseSpeciesList is a prototype parser for running beetle species lists}
 \usage{
 gettupel(pathToTxt)
 }

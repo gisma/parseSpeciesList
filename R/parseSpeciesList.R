@@ -1,4 +1,4 @@
-#' parseSpeciesList is a prototype parsers for running beetle species lists
+#' parseSpeciesList is a prototype parser for running beetle species lists
 #'
 #' @description parseSpeciesList is a first prototype to parse running beetle species lists as provided by the beetle enthusiasts.
 #'
