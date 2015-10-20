@@ -1,7 +1,7 @@
-#' parseSpeciesList is a prototype parser for running beetle species lists
+#' parseSpeciesList is a prototype function to parse Carabidae species lists
 #'
 #' @description parseSpeciesList is a first prototype to parse running beetle
-#'   species lists as provided by the beetle enthusiasts.
+#'   species lists as provided by the enthusiasts of the running beetle community.
 #'
 #'   This is a very raw and simple approach not really written in R style.
 #'   Actually the parser looks line by line for keywords and special tags.
