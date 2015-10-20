@@ -4,9 +4,11 @@
 \alias{gettupel}
 \title{parseSpeciesList is a prototype parser for running beetle species lists}
 \usage{
-gettupel(inputFile)
+gettupel(inputFile, short = TRUE)
 }
 \arguments{
+\item{short}{logical default = TRUE trys to get only the names. if FALSE it put all informations in the data frame}
+
 \item{inputTXT}{a Text of the specified format}
 }
 \description{

@@ -5,6 +5,7 @@
 #' This is a very raw and simple approach not optimized for R
 #'
 #' @param inputTXT a Text of the specified format
+#' @param short logical default = TRUE trys to get only the names. if FALSE it put all informations in the data frame
 #'
 #' @author
 #' Chris Reudenbach
@@ -63,7 +64,7 @@
 
 
 # main function parse the text and provides a first raw dataframe
-gettupel <- function (inputFile) {
+gettupel <- function (inputFile,short = TRUE) {
   tupel = list()
   dfcount = 0
   family <- ''
@@ -85,13 +86,19 @@ gettupel <- function (inputFile) {
                 readLines(con, n = 1, warn = TRUE)) > 0) {
     if (charmatch("family",oneLine ,nomatch = 0) > 0) {
       tmp <- unlist(strsplit(oneLine, "family"))
-      fam <- trimws(tmp[[2]])
+      if (short) {tmp<- strsplit(tmp, ",")
+                  fam <- trimws(tmp[[2]][1][1])}
+      else       {fam <- trimws(tmp[[2]])}
     } else if (charmatch("genus",oneLine,nomatch = 0) > 0) {
       tmp <- unlist(strsplit(oneLine, "genus"))
-      gen <- trimws(tmp[[2]])
+      if (short) {tmp<- strsplit(tmp, ",")
+                  gen <- trimws(tmp[[2]][1][1])}
+      else       {gen <- trimws(tmp[[2]])}
     } else if (charmatch("subgenus",oneLine,nomatch = 0) > 0) {
       tmp <- unlist(strsplit(oneLine, "subgenus"))
-      subgen <- trimws(tmp[[2]])
+      if (short) {tmp<- strsplit(tmp, ",")
+                  subgen <- trimws(tmp[[2]][1][1])}
+      else       {subgen <- trimws(tmp[[2]])}
     } else {
       species <- oneLine[1]
       loc <- parseLocations(species)
