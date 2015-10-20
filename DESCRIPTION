@@ -1,9 +1,9 @@
 Package: parseSpeciesList
 Type: Package
-Title: What the Package Does (Title Case)
+Title: parse running beetle species lists as provided by the beetle enthusiasts
 Version: 0.1
 Date: 2015-10-20
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Authors@R: person("Chris", "Reudenbach", email = "gisma@gis-ma.org", role = c("aut", "cre"))
+Description: It parses the raw scan text output of the Carabidae? Sources etc. follows
+License: MIT + file LICENSE, with exeption of the text chunk that is under BSD_3_clause + file LICENSE
 LazyData: TRUE
