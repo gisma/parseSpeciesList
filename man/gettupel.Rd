@@ -7,35 +7,46 @@
 gettupel(inputFile, short = TRUE)
 }
 \arguments{
-\item{short}{logical default = TRUE trys to get only the names. if FALSE it put all informations in the data frame}
+\item{short}{logical default = TRUE trys to get only the names. if FALSE it
+  put all informations in the data frame}
 
 \item{inputTXT}{a Text of the specified format}
 }
 \description{
-parseSpeciesList is a first prototype to parse running beetle species lists as provided by the beetle enthusiasts.
+parseSpeciesList is a first prototype to parse running beetle
+  species lists as provided by the beetle enthusiasts.
 
-This is a very raw and simple approach not optimized for R
+  This is a very raw and simple approach not really written in R style.
+  Actually the parser looks line by line for keywords and special tags.
+  Unfortunately it has to be performed line by line due to the fact that
+  keywords for sepcies are missing and there are not always matching rules
+  for the special tags. So in a first try we use the <keywords> "family",
+  "genus" and "subgenus". They are *always in the beginning of a line. After
+  genus or subgenus the species will follow without a keyword. The species
+  Line is enhanced by a more or less systematic list of country codes THAT
+  DESCRIBES THE species occurence. This is all seperated and put in non
+  normalized dataframe.
 }
 \examples{
 ### examples parseSpeciesList ###
- # we need stringr
+
+ ### we need the stringr lib
  library(stringr)
 
- # basic parsing
+ ### first the basic parsing
  inputFile <- system.file("extdata", "species.chunk",   package="parseSpeciesList")
  df <- gettupel(inputFile)
 
- ###  mapping useCase  ####
+ ###  now a basic mapping example  ####
 
- # we need some more libs
+ ###  we need some more libs ;)
    if (!require(downloader)) {install.packages("downloader")}
    if (!require(maptools)) {install.packages("maptools")}
    if (!require(sp)) {install.packages("sp")}
    if (!require(devtools)) {install.packages("devtools")}
-   library(maptools)
    library(downloader)
+   library(maptools)
    library(sp)
-   library(raster)
    library(devtools)
    if (!require(mapview)) {install_github("environmentalinformatics-marburg/mapview")}
    library(mapview)
