@@ -1,6 +1,6 @@
 #' parseSpeciesList is a prototype parsers for running beetle species lists
 #'
-#' @description parseSpeciesList ist a first prototype to parse running beetle species lists as provided by the community freaks.
+#' @description parseSpeciesList is a first prototype to parse running beetle species lists as provided by the beetle enthusiasts.
 #'
 #' This is a very raw and simple approach not optimized for R
 #'

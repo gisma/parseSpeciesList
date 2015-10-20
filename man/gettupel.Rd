@@ -11,7 +11,7 @@ gettupel(pathToTxt)
 \item{inputTXT}{a Text of the specified format}
 }
 \description{
-parseSpeciesList ist a first prototype to parse running beetle species lists as provided by the community freaks.
+parseSpeciesList is a first prototype to parse running beetle species lists as provided by the beetle enthusiasts.
 
 This is a very raw and simple approach not optimized for R
 }
