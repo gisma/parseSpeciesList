@@ -4,7 +4,7 @@ Title: parse running beetle species lists as provided by the beetle enthusiasts
 Version: 0.1
 Date: 2015-10-20
 Author: Chris Reudenbach, Florian Detsch
-Maintainer: Chris Reudenbach
+Maintainer: Chris Reudenbach <gisma@gis-ma.org>
 Description: It parses the raw scan text output of the Carabidae? Sources etc. follows
 License: MIT + file LICENSE, with exeption of the text chunk that is under BSD_3_clause + file LICENSE
 Depends: R (>= 3.1.0)
