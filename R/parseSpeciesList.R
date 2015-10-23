@@ -27,21 +27,25 @@
 #' @param short logical parameter if TRUE (default) the function trys to get only the names and country codes. If FALSE the full text
 #'   will put in the data frame.
 #'
-#' @author Chris Reudenbach
+#' @author Chris Reudenbach, Flo Detsch
 
 #' @examples
 #'  ### examples parseSpeciesList ###
 #'
 #'  ### we need the stringr lib
 #'  library(stringr)
+#'  library(foreach)
 #'
 #'  ### first the basic parsing
 #'  inputFile <- system.file("extdata", "species.chunk",   package="parseSpeciesList")
-#'  df <- gettupel(inputFile)
+#'  df <- getspecies(inputFile)
 #'
+#'
+#'  ######################################
 #'  ###  now a basic mapping example  ####
 #'
 #'  ###  we need some more libs ;)
+#'
 #'    if (!require(downloader)) {install.packages("downloader")}
 #'    if (!require(maptools)) {install.packages("maptools")}
 #'    if (!require(sp)) {install.packages("sp")}
@@ -75,118 +79,91 @@
 #'    mapView(sPDF2)
 #'
 #' @export
-#' @name gettupel
-#' @rdname gettupel
+#' @name getspecies
+#' @rdname getspecies
 #'
 
 
 
 
 # main function parse the text and provides a first raw dataframe
-gettupel <- function (inputFile,short = TRUE) {
+getspecies <- function (inputFile, short = TRUE) {
 
-  dfcount = 0
-  # create dataframe for the results of parsing
-  family <- ''
-  genus <- ''
-  subgenus <- ''
-  species <- ''
-  loctype <- ''
-  loc <- ''
-  df = data.frame(family,genus,subgenus,species,loctype,loc,stringsAsFactors = FALSE)
-
-  # list for the return of the location parsing
-  loc = list()
+  lns <- readLines(inputFile)
+  df <- data.frame(matrix(ncol = 6))
+  names(df) <- c("family", "genus", "subgenus", "species", "loctype", "loc")
 
   # casually they seem not to exist
-  gen = 'NA'
-  subgen = 'NA'
-  # open connection to the file and read it sequentially line by line
-   con  <- file(inputFile, open = "r")
-   while (length(oneLine <-
-                readLines(con, n = 1, warn = TRUE)) > 0) {
-     # if 'family' is found split it and subslpit it (same with the rest keywords)
+  fam <- gen <- subgen <- species <- loc <- sloc <- NA
+
+  lst_all <- foreach(i = 1:length(lns)) %do% {
+
+    oneLine <- lns[i]
+
+    ## family
     if (charmatch("family",oneLine ,nomatch = 0) > 0) {
       tmp <- unlist(strsplit(oneLine, "family"))
       if (short) {tmp<- strsplit(tmp, ",")
-                  fam <- trimws(tmp[[2]][1][1])}
+      fam <- trimws(tmp[[2]][1][1])}
       else       {fam <- trimws(tmp[[2]])}
+
+      ## genus
     } else if (charmatch("genus",oneLine,nomatch = 0) > 0) {
       tmp <- unlist(strsplit(oneLine, "genus"))
       if (short) {tmp<- strsplit(tmp, ",")
-                  gen <- trimws(tmp[[2]][1][1])}
+      gen <- trimws(tmp[[2]][1][1])}
       else       {gen <- trimws(tmp[[2]])}
+
+      ## subgenus
     } else if (charmatch("subgenus",oneLine,nomatch = 0) > 0) {
       tmp <- unlist(strsplit(oneLine, "subgenus"))
       if (short) {tmp<- strsplit(tmp, ",")
-                  subgen <- trimws(tmp[[2]][1][1])}
+      subgen <- trimws(tmp[[2]][1][1])}
       else       {subgen <- trimws(tmp[[2]])}
+
+      ## everything else
     } else {
       # all lines without keywords has to contain species
-      species <- oneLine[1]
+      species <- oneLine
       # so we call a special parser for them
-      loc <- parseLocations(species)
+      loc <- parseCountryCode(species)
+
+      if (length(loc) > 0) {
+        for (z in 1:length(loc))
+          species <- gsub(loc[z], "", species)
+      }
+
       # then we reorganise the returned lists
       if (length(loc) > 0) {
-        for (i in seq(1,length(loc))) {
-          sloc <- unlist(strsplit(loc[[i]], " "))
+        lst_loc <- lapply(seq(1,length(loc)), function(h) {
+          sloc <- unlist(strsplit(loc[[h]], " "))
           if (length(sloc) > 0) {
-            for (j in seq(2,length(sloc))) {
-              # actually this is the depreceated "tagged" version
-              #txt<- paste("<family>",fam,"</family> <genus>",gen,"</genus> <subgenus>",subgen,"</subgenus> <species>",species,"</species> <loctype>",sloc[1],"</loctype> <locations>",sloc[j], "</locations>")
-              #tupel[[length(tupel)+1]] <- txt
-              # we do what nobody would do in R we append it row by row to the data frame
-              df[dfcount,] <-
-                c(fam,gen,subgen,species,sloc[1],sloc[j])
-              dfcount = dfcount + 1
-            }
+            lst_sloc <- lapply(seq(2,length(sloc)), function(j) {
+              data.frame(loctype = sloc[1], loc = sloc[j])
+            })
+            dat_sloc <- do.call("rbind", lst_sloc)
           }
-        }
+        })
+        dat_loc <- do.call("rbind", lst_loc)
+      } else {
+        dat_loc <- data.frame(loctype = NA, loc = NA)
       }
     }
+
+    if (!exists("dat_loc"))
+      dat_loc <- data.frame(loctype = NA, loc = NA)
+
+    dat <- data.frame(family = fam,
+                      genus = gen,
+                      subgenus = subgen,
+                      species = species,
+                      dat_loc)
+
+    rm(dat_loc)
+    return(dat)
   }
 
-  return(df)
-  close(con)
+  dat_all <- do.call("rbind", lst_all)
+  return(dat_all)
+
 }
-
-# subparser for geographic location keys
-parseLocations <- function (intext,x) {
-  # initialize the vars
-  x = list()
-  aloc = ''
-  eloc = ''
-  nloc = ''
-  # get position of the differnt location tags in the string
-  ePos <-  str_locate_all(pattern = ' E: ',intext)[[1]][2] - 4
-  aPos <-  str_locate_all(pattern = ' A: ',intext)[[1]][2] - 4
-  nPos <-  str_locate_all(pattern = ' N: ',intext)[[1]][2] - 4
-  # ugly workaround because of totally chotic organization of the location codes
-  # and tags we have to derive a fixed order that we will be able to point on
-  # the correct labels after extracting them. i did it using a dataframe.
-  # finally we have a ordered list and we will submit the tags with the return
-  names <- c("a", "e", "n")
-  values <- c(aPos,ePos,nPos)
-  df <- data.frame(names,values)
-  df <- df[order(values),]
-  df <- df[complete.cases(df),]
-  # if there is a location tag
-  if (nrow(df) > 0) {
-    for (i in seq(1,nrow(df))) {
-      z <- df$values[i + 1]
-
-      if (i == nrow(df)) {
-        z <- nchar(intext)
-      }
-      var <- trimws(substring(intext,df$values[i] + 2 ,z + 1))
-      x[i] <- var #paste0(df$names[i],'loc')
-      assign(paste0(df$names[i],'loc'), var)
-    }
-  }
-  c(x, c = aloc)
-  c(x, c = eloc)
-  c(x, c = nloc)
-
-  return(x)
-}
-
