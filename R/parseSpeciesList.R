@@ -23,11 +23,14 @@
 #'   .
 #'   .
 #'
+#'
 #' @param inputTXT a Text of the specified format
 #' @param short logical parameter if TRUE (default) the function trys to get only the names and country codes. If FALSE the full text
 #'   will put in the data frame.
 #'
 #' @author Chris Reudenbach, Flo Detsch
+#'
+#'@references Löbl, I. & A. Smetana (eds): Catalogue of Palaearctic Coleoptera: \url{http://www.apollobooks.com/palaearcticcoleoptera.htm}
 
 #' @examples
 #'  ### examples parseSpeciesList ###
