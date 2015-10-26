@@ -89,4 +89,7 @@ parseSpeciesList is a first prototype to parse running beetle
 \author{
 Chris Reudenbach, Flo Detsch
 }
+\references{
+Löbl, I. & A. Smetana (eds): Catalogue of Palaearctic Coleoptera: \url{http://www.apollobooks.com/palaearcticcoleoptera.htm}
+}
 
