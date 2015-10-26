@@ -10,8 +10,9 @@ cleanSpeciesDf(inputFile)
 \item{inputTXT}{a Text of the specified format}
 }
 \description{
-cleanSpeciesDf is a function to clean a dataframe that contains a  beetle
-  species lists as provided by the enthusiasts of the running beetle community.
+cleanSpeciesDf is a function to clean a dataframe as provided by
+  the enthusiasts (coleopterists) of the beetle community.
+
   It uses the full power of df manipulation in R and is way (about 35 times ;) faster than the parseSpeciesList approach
 
 The resulting dataframe is a not normalized relation ( so it means a huge table with mostly redundant informations).
@@ -32,5 +33,8 @@ The resulting dataframe is a not normalized relation ( so it means a huge table 
 }
 \author{
 Jonas Hagge
+}
+\references{
+Löbl, I. & A. Smetana (eds): Catalogue of Palaearctic Coleoptera: \url{http://www.apollobooks.com/palaearcticcoleoptera.htm}
 }
 

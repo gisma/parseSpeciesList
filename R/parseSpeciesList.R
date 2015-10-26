@@ -1,7 +1,7 @@
 #' parseSpeciesList is a prototype function to parse a species lists
 #'
-#' @description parseSpeciesList is a first prototype to parse running beetle
-#'   species lists as provided by the enthusiasts of the running beetle community.
+#' @description parseSpeciesList is a first prototype to parse beetle
+#'   species lists as provided by the enthusiasts (coleopterists) of the beetle community.
 #'
 #'   This is a very raw and simple approach and due to parsing the text line by line not really
 #'   in R style.
