@@ -59,22 +59,24 @@
 #'    if (!require(mapview)) {install_github("environmentalinformatics-marburg/mapview")}
 #'    library(mapview)
 #'
-#'  #  we have prepared some mapdata source(http://thematicmapping.org/downloads/TM_WORLD_BORDERS-0.3.zip)
+#'    ###  load prepared mapdata (source: http://thematicmapping.org/downloads/TM_WORLD_BORDERS-0.3.zip)
 #'    load("data/world.Rdata")
-#'  # join the world countries to our data (iso2 seems best but stil poor)
+#'
+#'    ### now all findings of porculus (whatever it is ;))
+#'    porculus<- subset(df, (df$species =="porculus"))
+#'
+#'    ### join the world countries to our data
+#'    ### (iso2 fit most but there is no Code for the regions)
 #'    joinSpdf <- joinData2Map(
-#'    df
+#'    porculus
 #'      , nameMap = sPDF
 #'      , nameJoinIDMap = "ISO2"
 #'      , nameJoinColumnData = "loc")
 #'
-#'  # no we have to  project it
+#'    #### no we have to  project it
 #'    proj4string(joinSpdf) <- CRS("+init=epsg:4326")
 #'
-#'  # and plot it with ie using basic plot (and see nothing)
-#'    plot(joinSpdf)
-#'
-#'  # and plot it with ie using mapview (and have some colors and interactivity)
+#'    ### plot it with e.g. mapview (and have some colors and interactivity)
 #'    mapView(joinSpdf,zcol="species")
 #'
 #' @export
