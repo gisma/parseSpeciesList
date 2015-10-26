@@ -81,8 +81,8 @@ parseSpeciesList is a first prototype to parse running beetle
  # and plot it with ie using basic plot (and see nothing)
    plot(joinSpdf)
 
- # and plot it with ie using mapview (and have some interactivity)
-   mapView(joinSpdf)
+ # and plot it with ie using mapview (and have some colors and interactivity)
+   mapView(joinSpdf,zcol="species")
 }
 \author{
 Chris Reudenbach, Flo Detsch
