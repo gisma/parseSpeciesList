@@ -50,14 +50,14 @@
 #'  ###  now a basic mapping example  ####
 #'
 #'  ###  we need some more libs ;)
-#'    if (!require(devtools)) {install.packages("devtools")}
-#'    if (!require(maptools)) {install.packages("maptools")}
-#'    if (!require(sp)) {install.packages("sp")}
+#'    if (!require(devtools)) {install.packages("devtools")} # for installation from github
+#'    if (!require(maptools)) {install.packages("maptools")} # for read shapes
+#'    if (!require(sp)) {install.packages("sp")}             # for manipulationg spatial data sp objects
 #'    library(devtools)
 #'    library(maptools)
 #'    library(sp)
 #'    if (!require(mapview)) {install_github("environmentalinformatics-marburg/mapview")}
-#'    library(mapview)
+#'    library(mapview)  # for modern mapping
 #'
 #'    ###  load prepared mapdata (source: http://thematicmapping.org/downloads/TM_WORLD_BORDERS-0.3.zip)
 #'    load("data/world.Rdata")
