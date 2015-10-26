@@ -1,12 +1,12 @@
-#' parseSpeciesList is a prototype function to parse Carabidae species lists
+#' parseSpeciesList is a prototype function to parse a species lists
 #'
 #' @description parseSpeciesList is a first prototype to parse running beetle
 #'   species lists as provided by the enthusiasts of the running beetle community.
 #'
-#'   This is a very raw and simple approach not really written in R style.
-#'   Actually the parser looks line by line for keywords and special tags.
-#'   Unfortunately it has to be performed line by line due to the fact that
-#'   keywords for sepcies are missing and the rules are not always matching.
+#'   This is a very raw and simple approach and due to parsing the text line by line not really
+#'   in R style.
+#'
+#'   Unfortunately it has to be performed line by line because some keywords are missing and the rules are not always matching.
 #'   So in a first try we use the "family", "genus" and "subgenus" as keywords. They are always placed in the beginning of a
 #'   line. After "genus" or "subgenus" there is a unique line for each single species.
 #'   In the species textline we will find a more or less systematic list of country
@@ -40,43 +40,42 @@
 #'  inputFile <- system.file("extdata", "species.chunk",   package="parseSpeciesList")
 #'  df <- getspecies(inputFile)
 #'
+#'  ### all entries only for CZ
+#'  cz<- subset(df, df$loc =='CZ')
+#'
+#'  ### all entries for porculus
+#'  porculus<- subset(df, (df$species =="porculus"))
 #'
 #'  ######################################
 #'  ###  now a basic mapping example  ####
 #'
 #'  ###  we need some more libs ;)
-#'
-#'    if (!require(downloader)) {install.packages("downloader")}
+#'    if (!require(devtools)) {install.packages("devtools")}
 #'    if (!require(maptools)) {install.packages("maptools")}
 #'    if (!require(sp)) {install.packages("sp")}
-#'    if (!require(devtools)) {install.packages("devtools")}
-#'    library(downloader)
+#'    library(devtools)
 #'    library(maptools)
 #'    library(sp)
-#'    library(devtools)
 #'    if (!require(mapview)) {install_github("environmentalinformatics-marburg/mapview")}
 #'    library(mapview)
 #'
-#'  # first we need some spatial geometries for mapping the data
-#'  download("http://thematicmapping.org/downloads/TM_WORLD_BORDERS-0.3.zip",dest="worldborders.zip", mode = "wb")
-#'
-#'  # unzip it
-#'    unzip ("worldborders.zip",exdir = "./")
-#'
-#'  # read it to a spatialpointdataframe
-#'    sPDF <- readShapePoly('TM_WORLD_BORDERS-0.3.shp')
+#'  #  we have prepared some mapdata source(http://thematicmapping.org/downloads/TM_WORLD_BORDERS-0.3.zip)
+#'    load("data/world.Rdata")
 #'  # join the world countries to our data (iso2 seems best but stil poor)
-#'    sPDF2 <- joinData2Map(
+#'    joinSpdf <- joinData2Map(
 #'    df
 #'      , nameMap = sPDF
 #'      , nameJoinIDMap = "ISO2"
 #'      , nameJoinColumnData = "loc")
 #'
-#'  # we have to project it
-#'    proj4string(sPDF2) <- CRS("+init=epsg:4326")
+#'  # no we have to  project it
+#'    proj4string(joinSpdf) <- CRS("+init=epsg:4326")
 #'
-#'  # and finally plot it with mapview
-#'    mapView(sPDF2)
+#'  # and plot it with ie using basic plot (and see nothing)
+#'    plot(joinSpdf)
+#'
+#'  # and plot it with ie using mapview (and have some interactivity)
+#'    mapView(joinSpdf)
 #'
 #' @export
 #' @name getspecies
@@ -96,7 +95,7 @@ getspecies <- function (inputFile, short = TRUE) {
   # casually they seem not to exist
   fam <- gen <- subgen <- species <- loc <- sloc <- NA
 
-  lst_all <- foreach(i = 1:length(lns)) %do% {
+  lst_all <- foreach(i = 1:length(lns) ) %do%  {
 
     oneLine <- lns[i]
 
@@ -104,34 +103,41 @@ getspecies <- function (inputFile, short = TRUE) {
     if (charmatch("family",oneLine ,nomatch = 0) > 0) {
       tmp <- unlist(strsplit(oneLine, "family"))
       if (short) {tmp<- strsplit(tmp, ",")
-      fam <- trimws(tmp[[2]][1][1])}
+                  fam <- substring(trimws(tmp[[2]][1][1]), 0, regexpr(" ", trimws(tmp[[2]][1][1]))-1)}
       else       {fam <- trimws(tmp[[2]])}
 
       ## genus
     } else if (charmatch("genus",oneLine,nomatch = 0) > 0) {
       tmp <- unlist(strsplit(oneLine, "genus"))
       if (short) {tmp<- strsplit(tmp, ",")
-      gen <- trimws(tmp[[2]][1][1])}
+      gen <- substring(trimws(tmp[[2]][1][1]), 0, regexpr(" ", trimws(tmp[[2]][1][1]))-1)}
       else       {gen <- trimws(tmp[[2]])}
 
       ## subgenus
     } else if (charmatch("subgenus",oneLine,nomatch = 0) > 0) {
       tmp <- unlist(strsplit(oneLine, "subgenus"))
       if (short) {tmp<- strsplit(tmp, ",")
-      subgen <- trimws(tmp[[2]][1][1])}
+      subgen <- substring(trimws(tmp[[2]][1][1]), 0, regexpr(" ", trimws(tmp[[2]][1][1]))-1)}
       else       {subgen <- trimws(tmp[[2]])}
 
       ## everything else
     } else {
       # all lines without keywords has to contain species
+
       species <- oneLine
+
       # so we call a special parser for them
       loc <- parseCountryCode(species)
 
-      if (length(loc) > 0) {
-        for (z in 1:length(loc))
-          species <- gsub(loc[z], "", species)
-      }
+      if (short) {
+        species <- substring(trimws(species), 0, regexpr(" ", trimws(species))-1)
+      } else {
+          if (length(loc) > 0) {
+            for (z in 1:length(loc))
+              species <- gsub(loc[z], "", species)
+          }
+        }
+
 
       # then we reorganise the returned lists
       if (length(loc) > 0) {
@@ -164,6 +170,7 @@ getspecies <- function (inputFile, short = TRUE) {
   }
 
   dat_all <- do.call("rbind", lst_all)
+  dat_all <- dat_all[complete.cases(dat_all),]
   return(dat_all)
 
 }
