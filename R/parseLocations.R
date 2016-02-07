@@ -1,4 +1,4 @@
-#' parseCountrycodes is a helper function to parse a modiefied iso2 country code as provided by the bettle list
+#' parseCountrycodes is a helper function to parse a modiefied iso2 country code as provided by the beatle list
 
 #'
 #'@description parseCountrycodes parses the assuminly iso2 country code list of the running beetle species linestring. It provides a reionally E: N: A: sorted list of country coded occurency
