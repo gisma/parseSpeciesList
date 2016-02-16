@@ -2,56 +2,109 @@
 % Please edit documentation in R/runBeetle.R
 \name{runBeetle}
 \alias{runBeetle}
-\title{Wrapper function to analyse the running beetle spread according to the hypothesis of bindings to wetness}
+\title{Wrapper function to analyse the phylogenetic spread of running beetle
+ via a cost analysis based on morphometry and derived potential surface wetness.}
 \usage{
-runBeetle(cost = costraster,type=alt,occurence=carabLocs)
+runBeetle(rootDir,workingDir="cost",inputData=NULL,costType="tci",
+ externalCostRaster=NULL,internalCost=TRUE,parallel=FALSE)
 }
 \arguments{
-\item{iniparam}{the full set of params as provided initEnvironGIS(). please look into the INI file for further settings of the makePEak() mode and special settings.
-peak.mode
+\item{rootDir}{project directory\cr}
 
-(1) minmax: extracts local maxima altitudes from an arbitrary Digital
-                    Elevation Model (DEM) (optionally you may filter the data)
+\item{workingDir}{working directory\cr}
 
-(2) merged approach: extract peaks from a DEM by analyzing morphometry and
-                    landscape forms using the algorithm of Wood et others. The peak landforms are
-                    analyzed for MAximunm heights and this location is related
-                    to external peak data from Harrys peaklist or OSM}
+\item{inputData}{location data containing obligatory the cols lon,lat and
+optional a code col. The format has to be a data frame see example.}
 
-\item{myenv}{SAGA environment variables provided by initEnvironGIS()}
+\item{costType}{used if internalCost = TRUE.  default is "tci"  you can choose
+"tci" "dem.filled" or "accu" see details for more information}
 
-\item{fname.DEM}{name of georeferenced DEM data in GDAL format}
+\item{externalCostRaster}{default = NULL you may provide a GTiff file with the
+name cost.tif NOTE you have to set internalCost = FALSE}
+
+\item{internalCost}{default = TRUE switches to external provided GTiff file
+wich has to be named cost.tif}
+
+\item{parallel}{default is FALSE. if TRUE all available cpus are used}
+
+\item{dump}{default = FALSE if TRUE export r.terraflow products to GTiff}
+
+\item{useDump}{default = FALSE instead of running  r.terraflow again use
+products products to GTiff}
 }
 \value{
-runBeetle basically returns a list of coordinates altitudes (and names)
-that will be used to calculate the independence value.
+runBeetle returns:\cr
+(a) a matrix of euclidian distances\cr
+(b) a cost distance matrix  according to the choosen cost surface\cr
+(c) a walk distance matrix according to the choosen cost surface\cr
 }
 \description{
-Tibetan carabidae are spreading correlated to available humidity. Long term humidity is bound to surface  and ground water. It seems to be obvious that the estimation of spreeading speed and range is in no case a simple euclidian one. runBeetle provides a first better estimation using a cost or friction analysis assuming that the spread is following natural lines of wetness e.g. valleys, humidity gradients...
+The phylogenetic spreading of the tibetan carabidae seems to be
+correlated to valley linkage and available humidity. Long term humidity is
+bound to precipitation and morphometry. It is obvious that the estimation of
+spreeading speed and range is in no case a simple euclidian one. runBeetle
+provides a first better estimation using a cost or friction analysis assuming
+that the spread is following natural lines of wetness e.g. valleys, humidity
+gradients...whatever  I'am not a beetle ask the beetle
+\href{http://www.zoologie.uni-rostock.de/mitarbeiter/joachimschmidt/joachimschmidtpubl}{beetle
+guy}.
+}
+\details{
+The core of the analysis is an isotropic/anisotropic least cost path
+ calculation. By default the cost surface is assumed to be a local derivate
+ of the morphometry with respect to the potential soil humidity. A perfect
+ approch to derive such information is the use of a Digital Elevation Model
+ DEM and some corresponding derivates as the Topographic Convergence Index.\cr
+
+ If you choose "tci"  (default) the cost surface provides an estimation of
+ rainwater runoff availability to plants based on specific catchment area (A)
+ and local slope (b) such that TCI = ln(A/tan b) (Beven & Kirkby, 1979). This
+ seems be pretty straightforward and fairly suitable for the beetles
+ "behaviour.\cr
+
+ If you chosse "accu" a typical accumulation cost grid from the original DEM
+ will be used\cr
+
+ If you choose "dem.filled" a typical accumulation cost grid from the
+ hydrologically corrected DEM will be used\cr
+
+ For the r.walk algorithm the non accumulated data is used.
 }
 \examples{
-#### Example to use runBeetle for a common analysis of the
-    estimated spreading distances of an specifified area
 
-# You need a georeferenced DEM (GDAL format) as data input.
-# NOTE the existing projection of the data file has to be exactly the same
-# as provided in target.proj4  variable in the ini file
+\dontrun{
+#### NOTE: You obligatory need GRASS70 and SAGA 2.12+ on your system
 
+library(doParallel)
+library(foreach)
+library(raster)
+library(sp)
+library(gdalUtils)
 
+### NOTE: the area is specifified and automatically downloaded (SRTM) by the input data extent plus a "zone"
+### read a csv file
+fn<-system.file("bug.csv", package="biomix")
+beetleLocs<-read.csv2(fn,header = TRUE,sep = ',',dec = '.',stringsAsFactors=FALSE)
 
+### use some arbitrary locations from scratch
+beetleLocs <- as.list(c("86.83", "28.20", "100","84.58", "28.67", "200" ,"83.87", "28.80", "300"))
+beetleLocs <- data.frame(matrix(as.numeric(unlist(beetleLocs)), nrow=3, byrow=T),stringsAsFactors=FALSE)
+colnames(beetleLocs)<-c("lon","lat","code")
+beetleDist<-runBeetle(rootDir = "~/proj/beetle" ,inputData = beetleLocs)
+}
 }
 \author{
 Chris Reudenbach
+\cr
+\emph{Maintainer:} Chris REudenbach \email{reudenbach@uni-marburg.de}
 }
 \references{
-Rasemann, S., (2004), Geomorphometrische Struktur eines mesoskaligen alpinen Geosystems, Asgard-Verlag, St. Augustin, Bonner Geographische Abhandlungen, Heft Nr. 111, URL: \url{http://hss.ulb.uni-bonn.de/2003/0211/0211.htm}
+Schmidt, J., Böhner, J., Brandl, R. & Opgenoorth, L. (in review):
+ Mass elevation and lee effect override latitudinal effects in determining
+ the distribution ranges of species: Ground beetles from the Himalaya-Tibet
+ Orogen. – PLoS ONE.
 
-Wood, J.D., (1996), The geomorphological characterisation of digital elevation models. PhD Thesis, University of Leicester, UK
-
-Schmidt, J, & A. Hewitt, (2004). Fuzzy land element classification from DTMs based on geometry and terrain position. Geoderma 121.3, S.243-256. URL: \url{http://home.shirazu.ac.ir/~kompani/geomorphology/geomorphology-lec-papers-mehr88/schmidt-fuzzylandsurfaceclassifi-geoderma2004.pdf}
-
-Breitkreutz, H.: Gipfelliste. URL: \url{http://www.tourenwelt.info/commons/download/bergliste-komplett.kmz.php}
-
-OSM natural: keys \url{http://wiki.openstreetmap.org/wiki/Key:natural}
+\href{https://grass.osgeo.org/grass7/}{GRASS70}
+\href{https://sourceforge.net/projects/saga-gis/files/}{SAGA GIS}
 }
 

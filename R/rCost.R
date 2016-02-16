@@ -1,25 +1,25 @@
-#'@name costDist
-#'@title Calculate the least cost path from point to point using a given friction matrix using plain R
+#'@name rcost
+#'@title Calculate the least cost path from point to point using a given friction matrix
 #'@description
 #' http://moc.environmentalinformatics-marburg.de/doku.php?id=courses:msc:advanced-gis:description
 #'
-#'@usage costDist(pointList,costraster)
+#'@usage rcost(pointList,costraster)
 #'@author Chris Reudenbach
 #'
 #'
 #'@param pointList containing coords
 #'@param a cost raster object
 #'
-#'@return costDist returns matrix cost/transformed real distances
+#'@return rcost returns matrix cost/transformed real distances
 #'
-#'@export costDist
+#'@export rcost
 #'@examples
 #'#### calculate least cost pathes
 #'
-#'       costMatrix<-costDistance(pointList,dem)
+#'       costMatrix<-rcostance(pointList,dem)
 
 
-costDist<- function(pointList, costraster, plots=TRUE){
+rcost<- function(pointList, costraster, plots=TRUE){
   library(gdistance)
   # costpath is pretty time consuming so we construct a max search distance from the dsistance matrix + the dom threshold
   dist<-as.data.frame(pointDistance(pointList,pointList,lonlat=TRUE,allpairs=TRUE))

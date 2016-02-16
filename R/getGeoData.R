@@ -584,15 +584,15 @@ ccodes <- function() {
       f <- paste('srtm_', colTile, '_', rowTile, sep="")
       srtmNames <- c(srtmNames, paste(f, ".ZIP", sep=""))
       #tiffilename <- paste(path, "/", f, ".TIF", sep="")
-      lat<-lat+5
+      lon<-lon+5
     }
-    lat<-floor(x@ymin-3)
-    lon<-lon+5
+    lon<-floor(x@xmin-3)
+    lat<-lat+5
   }
   return(srtmNames)
 }
 
-.SRTM <- function(xtent,zone=0, download, path) {
+.SRTM <- function(xtent,zone=3.0, download, path) {
 
   if (!download) {
     return(srtmNames<-.getSRTMfn(xtent,zone))
@@ -602,8 +602,12 @@ ccodes <- function() {
   lon<- floor(x@xmin-zone)
   lat<-floor(x@ymin-zone)
   lonFac<-ceiling(((x@xmax+zone)-lon)/5)
+  if (lonFac == 0){lonFac<-1}
   latFac<-ceiling(((x@ymax+zone)-lat)/5)
-  cat('#########################\nYou are going to download ',lonFac*latFac, ' SRTM tiles approximately ',lonFac*latFac*35,'MByte data\n NOTE: this may take a while...')
+  if (latFac == 0){latFac<-1}
+  cat('#########################\nYou are going to download ',
+      lonFac*latFac, ' SRTM tiles with approximately ',
+      lonFac*latFac*35,' MByte\nNOTE: this may take a while...\n')
   ytiles<-seq(1,latFac)
   xtiles<-seq(1,lonFac)
   for (i in ytiles){
@@ -625,7 +629,7 @@ ccodes <- function() {
       if (!file.exists(tiffilename)) {
         if (!file.exists(zipfilename)) {
           if (download) {
-            cat('Downloading: ',basename(zipfilename))
+            cat('Downloading: ',basename(zipfilename),'\n')
             theurl <- paste("ftp://srtm.csi.cgiar.org/SRTM_v41/SRTM_Data_GeoTIFF/", f, ".ZIP", sep="")
             test <- try (.download(theurl, zipfilename) , silent=TRUE)
             if (class(test) == 'try-error') {
@@ -644,21 +648,32 @@ ccodes <- function() {
         }
       }
 
-      lat<-lat+5
+      lon<-lon+5
     }
-    lat<-floor(x@ymin-3)
-    lon<-lon+5
+    lon<-floor(x@xmin-3)
+    lat<-lat+5
   }
 
   listTif<-list.files(paste0(dirname(path), "/srtm/"), pattern = glob2rx("srtm*.tif"),
                       full.names = TRUE, recursive = FALSE)
-  mosaicSRTM<-mosaic_rasters(gdalfile=listTif,dst_dataset=paste0(dirname(path), "/srtm/mosaicSRTM.tif"),of="GTiff",output_Raster=FALSE,
-                             verbose=TRUE,seperate=FALSE)
+  cat ("merging:\n",paste(listTif,'\n'))
+  mosaicSRTM<-mosaic_rasters(gdalfile=listTif,
+                             dst_dataset=paste0(dirname(path), "/srtm/mosaicSRTM.tif"),
+                             output_Raster=FALSE,
+                             of="GTiff",
+                             verbose=FALSE,
+                             seperate=FALSE,
+                             overwrite= TRUE
+                             )
 
-  mosaicSRTM<- raster(paste0(dirname(path), "/srtm/mosaicSRTM.tif"))
-  #plot(mosaicSRTM)
-  #writeRaster(rs,filename = "rs.tif")
-  #rs <- raster(tiffilename)
+  mosaicSRTM<- gdal_translate(paste0(dirname(path), "/srtm/mosaicSRTM.tif"),
+                              paste0(dirname(path), "/srtm/cMosaicSRTM.tif"),
+                              projwin=c(xtent@xmin-zone,xtent@ymax+zone,xtent@xmax+zone,xtent@ymin-zone),
+                              output_Raster = TRUE,
+                              overwrite= TRUE,
+                              verbose=TRUE
+  )
+
   projection(mosaicSRTM) <- "+proj=longlat +datum=WGS84"
   return(mosaicSRTM)
 
