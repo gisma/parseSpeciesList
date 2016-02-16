@@ -80,6 +80,7 @@ library(foreach)
 library(raster)
 library(sp)
 library(gdalUtils)
+library(rgdal)
 
 ### NOTE: the area is specifified and automatically downloaded (SRTM) by the input data extent plus a "zone"
 ### read a csv file
