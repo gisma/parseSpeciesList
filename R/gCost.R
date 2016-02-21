@@ -38,7 +38,7 @@ gcost<- function(runDir,currentP,allP){
   vecFn<-paste0(vecFn[1],"_",vecFn[2])
 
   # calculate accumulated cost, direction, nearest point from existing cost raster named "total cost"
-  cat("accucost for Lon/Lat:",vecFnNumeric,"\n")
+  cat("iterate all points for Lon/Lat:",vecFnNumeric,"\n")
 
 
   d=NULL
@@ -87,6 +87,14 @@ gcost<- function(runDir,currentP,allP){
                      output=runDir
   )
 
+  cat("write all-pathes-shape:",paste0(runDir,"/walkdrain_",vecFn),"\n")
+  rgrass7::execGRASS("v.out.ogr",
+                     flags=c("overwrite","quiet"),
+                     input=paste0("walkdrain_",vecFn),
+                     type="line",
+                     output=runDir
+
+  )
   #return distances of point[i]
   colnames(d)<-c("sLon","sLat","dLon","dLat","costDist","eucDist","walkDist")
   return(d)
@@ -124,6 +132,7 @@ getCosts <- function (inCost,vecFn,eucDist,j,endPName){
 
 
   rgrass7::execGRASS("v.db.addcolumn",
+                     flags=c("quiet"),
                      map=paste0(inCost,"_",vecFn),
                      columns=paste(inCost," double precision,eucDist double precision")
   )
@@ -137,7 +146,7 @@ getCosts <- function (inCost,vecFn,eucDist,j,endPName){
   )
 
   rgrass7::execGRASS("v.to.db",
-
+                     flags=c("quiet"),
                      map=paste0(inCost,"_",vecFn),
                      option="length",
                      type="line",
@@ -146,11 +155,13 @@ getCosts <- function (inCost,vecFn,eucDist,j,endPName){
   )
 
   rgrass7::execGRASS("v.db.update",
+                     flags=c("quiet"),
                      map=paste0(inCost,"_",vecFn),
                      column="label",
                      value=paste0("'",endPName[1],"|",endPName[2],"'")
   )
   rgrass7::execGRASS("v.db.update",
+                     flags=c("quiet"),
                      map=paste0(inCost,"_",vecFn),
                      column="eucDist",
                      value=as.character(eucDist)

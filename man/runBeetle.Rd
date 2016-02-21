@@ -19,16 +19,16 @@ optional a code col. The format has to be a data frame see example.}
 \item{costType}{used if internalCost = TRUE.  default is "tci"  you can choose
 "tci" "dem.filled" or "accu" see details for more information}
 
-\item{externalCostRaster}{default = NULL you may provide a GTiff file with the
-name cost.tif NOTE you have to set internalCost = FALSE}
-
 \item{internalCost}{default = TRUE switches to external provided GTiff file
 wich has to be named cost.tifx}
 
 \item{dump}{default = FALSE if TRUE export r.terraflow products to GTiff}
 
-\item{useDump}{default = FALSE instead of running  r.terraflow again use
+\item{usedump}{default = FALSE instead of running  r.terraflow again use
 products products to GTiff}
+
+\item{externalCostRaster}{default = NULL you may provide a GTiff file with the
+name cost.tif NOTE you have to set internalCost = FALSE}
 }
 \value{
 runBeetle returns:\cr
@@ -87,7 +87,7 @@ beetleLocs<-read.csv2(fn,header = TRUE,sep = ',',dec = '.',stringsAsFactors=FALS
 beetleLocs <- as.list(c("86.83", "28.20", "100","84.58", "28.67", "200" ,"83.87", "28.80", "300"))
 beetleLocs <- data.frame(matrix(as.numeric(unlist(beetleLocs)), nrow=3, byrow=T),stringsAsFactors=FALSE)
 colnames(beetleLocs)<-c("lon","lat","code")
-beetleDist<-runBeetle(rootDir = "~/proj/beetle" ,inputData = beetleLocs)
+beetleDist<-runBeetle(rootDir = "/home/creu/proj/beetle" ,inputData = beetleLocs, usedump=TRUE, walk=TRUE)
 }
 }
 \author{

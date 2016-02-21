@@ -41,7 +41,7 @@
 #'@param internalCost default = TRUE switches to external provided GTiff file
 #'  wich has to be named cost.tifx
 #'@param dump default = FALSE if TRUE export r.terraflow products to GTiff
-#'@param useDump default = FALSE instead of running  r.terraflow again use
+#'@param usedump default = FALSE instead of running  r.terraflow again use
 #'  products products to GTiff
 #'
 #'@details  The core of the analysis is an isotropic/anisotropic least cost path
@@ -91,7 +91,7 @@
 #' beetleLocs <- as.list(c("86.83", "28.20", "100","84.58", "28.67", "200" ,"83.87", "28.80", "300"))
 #' beetleLocs <- data.frame(matrix(as.numeric(unlist(beetleLocs)), nrow=3, byrow=T),stringsAsFactors=FALSE)
 #' colnames(beetleLocs)<-c("lon","lat","code")
-#' beetleDist<-runBeetle(rootDir = "~/proj/beetle" ,inputData = beetleLocs)
+#' beetleDist<-runBeetle(rootDir = "/home/creu/proj/beetle" ,inputData = beetleLocs, usedump=TRUE, walk=TRUE)
 #' }
 
 
@@ -99,18 +99,14 @@ runBeetle <-function(rootDir,
                      workingDir="cost",
                      inputData=NULL,
                      costType="tci",
-                     externalCostRaster=NULL,
                      internalCost=TRUE,
-                     parallel=FALSE,
+                     walk=FALSE,
                      dump=FALSE,
-                     useDump=FALSE){
+                     usedump=FALSE,
+                     memSize=300,
+                     externalCostRaster=NULL){
 
-
-  if (parallel){
-    # register number of cores for parallel operations
-    registerDoParallel(cores=detectCores())
-  }
-  if (useDump){
+  if (usedump){
     internalCost<-FALSE
     externalCostRaster<-paste0(file.path(rootDir, workingDir),"/cost.tif")
     envGIS<- initRGIS(root.dir=rootDir,working.dir=workingDir,fndem=externalCostRaster)
@@ -123,7 +119,7 @@ runBeetle <-function(rootDir,
     Tiff2G(runDir=envGIS$runDir,layer="dem")
   }
   if (internalCost){
-    useDump<-FALSE
+    usedump<-FALSE
   }
 
   # check if input data is correct
@@ -187,10 +183,10 @@ runBeetle <-function(rootDir,
                        elevation="dem",
                        filled="filled",
                        direction="accudir",
-                       swatershed="dem.watershed",
+                       swatershed="watershed",
                        accumulation="accu",
                        tci="tci",
-                       memory=8000,
+                       memory=memSize,
                        stats="demstats.txt")
     # forks in cost types NOTE all will be accumulated in gcost
     if (costType == "tci"){
@@ -248,7 +244,7 @@ runBeetle <-function(rootDir,
       startP<-allP[i]
       allP<-allP[-i]
       if (!is.null(unlist(startP))){
-        accuwalk("dem","cost",startP,memory=8000)
+        accuCalc(envGIS=envGIS,currentP=startP,memory=memSize,dump=dump,walk=walk)
         costDist[[i]]<-gcost(envGIS$runDir,startP,allP)
       }
     }
@@ -267,79 +263,4 @@ runBeetle <-function(rootDir,
   return(mergedCostDist)
 }
 
-getMinMaxG <- function (layer=NULL){
-  r.info<-rgrass7::execGRASS('r.info', flags=c("r","quiet"), map=layer,intern=TRUE)
-  min <- as.numeric(unlist(strsplit(r.info[1], split='=', fixed=TRUE))[2])
-  max <- as.numeric(unlist(strsplit(r.info[2], split='=', fixed=TRUE))[2])
-  return(c(min,max))
 
-}
-
-G2Tiff <- function (runDir=NULL,layer=NULL){
-
-  rgrass7::execGRASS("r.out.gdal",
-                     flags=c("c","overwrite"),
-                     createopt="TFW=YES,COMPRESS=LZW",
-                     input=layer,
-                     output=paste0(runDir,"/",layer,".tif")
-  )
-}
-
-Tiff2G <- function (runDir=NULL,layer=NULL){
-  rgrass7::execGRASS('r.external',
-                     flags=c('o',"overwrite","quiet"),
-                     input=paste0(layer,".tif"),
-                     output=layer,
-                     band=1
-  )
-}
-
-OGR2G <- function (runDir=NULL,layer=NULL){
-   # import point locations to GRASS
-   rgrass7::execGRASS('v.in.ogr',
-                      flags=c('o',"overwrite","quiet"),
-                      input=paste0(layer,".shp"),
-                      output=layer
-   )
-}
-
-G2OGR <- function (runDir=NULL,layer=NULL){
-rgrass7::execGRASS("v.out.ogr",
-                   flags=c("overwrite","quiet"),
-                   input=paste0(layer,".shp"),
-                   type="line",
-                   output=layer
-)
-}
-
-
-accuwalk <- function (dem,cost,currentP,lambda=0.5,memory=4000){
-
-  rgrass7::execGRASS("r.cost",
-                     flags=c("overwrite","quiet"),
-                     parameters=list(input = cost,
-                                     outdir="accudir",
-                                     output="accu",
-                                     start_coordinates = as.numeric(unlist(currentP)),
-                                     memory=8000)
-  )
-
-  rgrass7::execGRASS("r.walk",
-                     flags=c("k","overwrite","quiet"),
-                     elevation=dem,
-                     friction=cost,
-                     outdir="walkdir",
-                     output="walk",
-                     start_coordinates=as.numeric(unlist(currentP)),
-                     lambda=lambda
-  )
-}
-### optional transformation to Albert equal area
-### TODO make the central meridian dynamical
-#   mosaicSRTM<- gdalwarp(paste0(rootDir, "/srtm/cMosaicSRTM.tif"),
-#                         paste0(rootDir, "/srtm/cpMosaicSRTM.tif"),
-#                         t_srs='+proj=aea +lat_1=15 +lat_2=65 +lat_0=30 +lon_0=95 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs',
-#                         output_Raster = TRUE,
-#                         overwrite= TRUE,
-#                         verbose=TRUE
-#   )
