@@ -32,9 +32,7 @@ products products to GTiff}
 }
 \value{
 runBeetle returns:\cr
-(a) a matrix of euclidian distances\cr
-(b) a cost distance matrix  according to the choosen cost surface\cr
-(c) a walk distance matrix according to the choosen cost surface\cr
+(a) a dataframe with the (a) euclidian distances, (b) cost distance (isotropic cost surface) and (c) the walk distance (anisotropic cost surface)\cr
 }
 \description{
 The phylogenetic spreading of the tibetan carabidae seems to be

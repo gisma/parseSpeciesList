@@ -65,10 +65,8 @@
 #'  For the r.walk algorithm the non accumulated data is used.
 
 #'@return runBeetle returns:\cr
-#' (a) a matrix of euclidian distances\cr
-#' (b) a cost distance matrix  according to the choosen cost surface\cr
-#' (c) a walk distance matrix according to the choosen cost surface\cr
-# (d) a shapefile per source point and cost analysis type (walk/drain) containing the same information and geometry
+#' (a) a dataframe with the (a) euclidian distances, (b) cost distance (isotropic cost surface) and (c) the walk distance (anisotropic cost surface)\cr
+#  Additionally for each source point and cost analysis type (walk/drain) a seperate shapefile containing the same information and geometry is created
 #'
 #'
 #'@export runBeetle
@@ -264,8 +262,9 @@ runBeetle <-function(rootDir,
   #dem + point<-mapview(pointList)
 
 
-  print("That's it")
-  return(costDist)
+  cat('Thats it')
+  mergedCostDist = Reduce(function(...) merge(..., all=T), costDist)
+  return(mergedCostDist)
 }
 
 getMinMaxG <- function (layer=NULL){
