@@ -13,7 +13,7 @@
 #'guy}.
 #'
 #'@usage runBeetle(rootDir,workingDir="cost",inputData=NULL,costType="tci",
-#'  externalCostRaster=NULL,internalCost=TRUE,parallel=FALSE)
+#'  externalCostRaster=NULL,internalCost=TRUE)
 
 #'
 #'@author Chris Reudenbach
@@ -39,8 +39,7 @@
 #'@param externalCostRaster default = NULL you may provide a GTiff file with the
 #'  name cost.tif NOTE you have to set internalCost = FALSE
 #'@param internalCost default = TRUE switches to external provided GTiff file
-#'  wich has to be named cost.tif
-#'@param parallel default is FALSE. if TRUE all available cpus are used
+#'  wich has to be named cost.tifx
 #'@param dump default = FALSE if TRUE export r.terraflow products to GTiff
 #'@param useDump default = FALSE instead of running  r.terraflow again use
 #'  products products to GTiff
@@ -76,7 +75,7 @@
 #'@examples
 #'
 #'\dontrun{
-#'#### NOTE: You obligatory need GRASS70 and SAGA 2.12+ on your system
+#'#### NOTE: You obligatory need GRASS70
 #'
 #' library(doParallel)
 #' library(foreach)
@@ -242,20 +241,7 @@ runBeetle <-function(rootDir,
   ##### Main loop
   # calulate for each point a accumulated cost raster
   # NOTE the used data is totalcost from above!!!
-  if (parallel){
-    #lst_all <- foreach(i = 1:ceiling(length(allP)*0.5)) %dopar% {
-    lst_all <- for (i in seq(1,length(allP))){
-      # take single point from list
-      singleP<- allP[i]
-      # call the cost sub
-      dfDistance<-gcost(envGIS$runDir,singleP,allP)
-      return(dfDistance)
 
-    }
-    # transfer and bind the single foreach dataframes to a final result df
-    costDist <- do.call("rbind", lst_all)
-    costDist <- costDist[complete.cases(costDist),]
-  } else{
 
     #lst_all <- foreach(i = 1:ceiling(length(allP)*0.5)) %dopar% {
     #costDistTmp<-data.frame(num=rep(NA, 5), txt=rep("", 5), stringsAsFactors=FALSE)
@@ -264,10 +250,10 @@ runBeetle <-function(rootDir,
       startP<-allP[i]
       allP<-allP[-i]
       if (!is.null(unlist(startP))){
+        accuwalk("dem","cost",startP,memory=8000)
         costDist[[i]]<-gcost(envGIS$runDir,startP,allP)
       }
     }
-  }
 
 
   ### todo
@@ -325,6 +311,29 @@ rgrass7::execGRASS("v.out.ogr",
                    type="line",
                    output=layer
 )
+}
+
+
+accuwalk <- function (dem,cost,currentP,lambda=0.5,memory=4000){
+
+  rgrass7::execGRASS("r.cost",
+                     flags=c("overwrite","quiet"),
+                     parameters=list(input = cost,
+                                     outdir="accudir",
+                                     output="accu",
+                                     start_coordinates = as.numeric(unlist(currentP)),
+                                     memory=8000)
+  )
+
+  rgrass7::execGRASS("r.walk",
+                     flags=c("k","overwrite","quiet"),
+                     elevation=dem,
+                     friction=cost,
+                     outdir="walkdir",
+                     output="walk",
+                     start_coordinates=as.numeric(unlist(currentP)),
+                     lambda=lambda
+  )
 }
 ### optional transformation to Albert equal area
 ### TODO make the central meridian dynamical

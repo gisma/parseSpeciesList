@@ -40,24 +40,6 @@ gcost<- function(runDir,currentP,allP){
   # calculate accumulated cost, direction, nearest point from existing cost raster named "total cost"
   cat("accucost for Lon/Lat:",vecFnNumeric,"\n")
 
-  rgrass7::execGRASS("r.cost",
-                     flags=c("overwrite","quiet"),
-                     parameters=list(input = "cost",
-                                     outdir="accudir",
-                                     output="accu",
-                                     start_coordinates = as.numeric(unlist(currentP)),
-                                     memory=8000)
-  )
-  cat("r.walk  for Lon/Lat:",vecFnNumeric,"\n")
-  rgrass7::execGRASS("r.walk",
-                     flags=c("k","overwrite","quiet"),
-                     elevation="dem",
-                     friction="cost",
-                     outdir="walkdir",
-                     output="walk",
-                     start_coordinates=as.numeric(unlist(currentP)),
-                     lambda=0.5
-  )
 
   d=NULL
 

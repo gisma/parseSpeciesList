@@ -6,7 +6,7 @@
  via a cost analysis based on morphometry and derived potential surface wetness.}
 \usage{
 runBeetle(rootDir,workingDir="cost",inputData=NULL,costType="tci",
- externalCostRaster=NULL,internalCost=TRUE,parallel=FALSE)
+ externalCostRaster=NULL,internalCost=TRUE)
 }
 \arguments{
 \item{rootDir}{project directory\cr}
@@ -23,9 +23,7 @@ optional a code col. The format has to be a data frame see example.}
 name cost.tif NOTE you have to set internalCost = FALSE}
 
 \item{internalCost}{default = TRUE switches to external provided GTiff file
-wich has to be named cost.tif}
-
-\item{parallel}{default is FALSE. if TRUE all available cpus are used}
+wich has to be named cost.tifx}
 
 \item{dump}{default = FALSE if TRUE export r.terraflow products to GTiff}
 
@@ -73,7 +71,7 @@ The core of the analysis is an isotropic/anisotropic least cost path
 \examples{
 
 \dontrun{
-#### NOTE: You obligatory need GRASS70 and SAGA 2.12+ on your system
+#### NOTE: You obligatory need GRASS70
 
 library(doParallel)
 library(foreach)
