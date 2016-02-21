@@ -38,7 +38,7 @@ gcost<- function(runDir,currentP,allP){
   vecFn<-paste0(vecFn[1],"_",vecFn[2])
 
   # calculate accumulated cost, direction, nearest point from existing cost raster named "total cost"
-  cat("accucost raster for Lon/Lat:",vecFnNumeric,"\n")
+  cat("accucost for Lon/Lat:",vecFnNumeric,"\n")
 
   rgrass7::execGRASS("r.cost",
                      flags=c("overwrite","quiet"),
@@ -48,7 +48,16 @@ gcost<- function(runDir,currentP,allP){
                                      start_coordinates = as.numeric(unlist(currentP)),
                                      memory=8000)
   )
-
+  cat("r.walk  for Lon/Lat:",vecFnNumeric,"\n")
+  rgrass7::execGRASS("r.walk",
+                     flags=c("k","overwrite","quiet"),
+                     elevation="dem",
+                     friction="cost",
+                     outdir="walkdir",
+                     output="walk",
+                     start_coordinates=as.numeric(unlist(currentP)),
+                     lambda=0.5
+  )
 
   d=NULL
 
@@ -58,15 +67,7 @@ gcost<- function(runDir,currentP,allP){
     endPName<-  as.character(unlist(allP[j]))
 
     eucDist<-pointDistance(unlist(currentP),unlist(allP[j]),lonlat=TRUE)
-    rgrass7::execGRASS("r.walk",
-                       flags=c("k","overwrite","quiet"),
-                       elevation="dem",
-                       friction="cost",
-                       outdir="walkdir",
-                       output="walk",
-                       start_coordinates=as.numeric(unlist(allP[j])),
-                       lambda=0.5
-    )
+
 
     # calculate least cost path
     rgrass7::execGRASS("r.drain",
@@ -105,7 +106,7 @@ gcost<- function(runDir,currentP,allP){
   )
 
   #return distances of point[i]
-  colnames(d)<-c("sLon","sLat","dLon","dLat","costDist","eucDist")
+  colnames(d)<-c("sLon","sLat","dLon","dLat","costDist","eucDist","walkDist")
   return(d)
 }
 
@@ -127,13 +128,7 @@ getCosts <- function (inCost,vecFn,eucDist,j,endPName){
                      type="line"
   )
 
-  rgrass7::execGRASS("v.category",
-                     flags=c("overwrite","quiet"),
-                     input=paste0(inCost,"_",vecFn),
-                     output="merge",
-                     option="sum",
-                     cat=j
-  )
+
 
   # calculate the distance of the current map
   costDist<-rgrass7::execGRASS("v.report",
@@ -151,6 +146,13 @@ getCosts <- function (inCost,vecFn,eucDist,j,endPName){
                      columns=paste(inCost," double precision,eucDist double precision")
   )
 
+  rgrass7::execGRASS("v.category",
+                     flags=c("overwrite","quiet"),
+                     input=paste0(inCost,"_",vecFn),
+                     output="merge",
+                     option="sum",
+                     cat=j
+  )
 
   rgrass7::execGRASS("v.to.db",
 

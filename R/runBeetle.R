@@ -117,7 +117,7 @@ runBeetle <-function(rootDir,
     internalCost<-FALSE
     externalCostRaster<-paste0(file.path(rootDir, workingDir),"/cost.tif")
     envGIS<- initRGIS(root.dir=rootDir,working.dir=workingDir,fndem=externalCostRaster)
-
+    cat("i will take the existing results from a former r.terraflow analysis. \n")
     Tiff2G(runDir=envGIS$runDir,layer="cost")
     Tiff2G(runDir=envGIS$runDir,layer="accu")
     Tiff2G(runDir=envGIS$runDir,layer="filled")
@@ -318,6 +318,14 @@ OGR2G <- function (runDir=NULL,layer=NULL){
    )
 }
 
+G2OGR <- function (runDir=NULL,layer=NULL){
+rgrass7::execGRASS("v.out.ogr",
+                   flags=c("overwrite","quiet"),
+                   input=paste0(layer,".shp"),
+                   type="line",
+                   output=layer
+)
+}
 ### optional transformation to Albert equal area
 ### TODO make the central meridian dynamical
 #   mosaicSRTM<- gdalwarp(paste0(rootDir, "/srtm/cMosaicSRTM.tif"),
